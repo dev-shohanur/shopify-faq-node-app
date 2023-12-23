@@ -1,0 +1,32 @@
+<div id="general-faq" data-groupID="{{block.settings.groupID}}" />
+<script
+  src="{{ 'scripts.js' | asset_url }}"
+  defer
+/>
+
+{% schema %}
+{
+  "name": "Star Rating",
+  "target": "section",
+  "settings": [
+    {
+      "type": "product",
+      "id": "product",
+      "label": "product",
+      "autofill": true
+    },
+    {
+      "type": "number",
+      "id": "groupID",
+      "label": "Group ID",
+      "default": 1
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Hello World"
+    }
+  ]
+}
+{% endschema %}

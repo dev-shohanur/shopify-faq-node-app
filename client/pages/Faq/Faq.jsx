@@ -6,137 +6,148 @@ import {
   LegacyCard,
   useIndexResourceState,
   Text,
-  Badge,
-  TextField,
-  Card,
-  InlineGrid,
-  FormLayout,
-  Form,
   ButtonGroup,
-  Icon,
   Frame,
-  Modal,
-  LegacyStack,
-  ChoiceList,
+  Spinner,
 } from "@shopify/polaris";
 import useFetch from "../../hooks/useFetch";
-import { DeleteMajor, EditMajor } from "@shopify/polaris-icons";
-import FaqGroup from "./FaqGroup";
+import {
+  DeleteMajor,
+  EditMajor,
+  MobileBackArrowMajor,
+} from "@shopify/polaris-icons";
+import FaqItem from "./FaqItem";
+import useDataFetcher from "../../hooks/useDataFetcher";
+import { usePathParams } from "raviger";
+import FaqForm from "./FaqForm";
 
-const useDataFetcher = (initialState, url, options) => {
-  const [data, setData] = useState(initialState);
-  const fetch = useFetch();
-
-  const fetchData = async () => {
-    setData("loading...");
-    const result = await (await fetch(url, options)).json();
-    setData(result);
-  };
-
-  return [data, fetchData];
-};
-
-const Faq = () => {
+const Faq = ({ groupId }) => {
   const [orders, setOrders] = useState([]);
-
-  const [responseData, fetchContent] = useDataFetcher("", "/api/apps/faq");
-  useEffect(() => {
-    fetchContent();
-    if (responseData.success) {
-      setOrders([...responseData.result]);
-    }
-  }, [responseData, fetchContent]);
-
-  const resourceName = {
-    singular: "order",
-    plural: "orders",
-  };
-
-  const { selectedResources, allResourcesSelected, handleSelectionChange } =
-    useIndexResourceState(orders);
   const [active, setActive] = useState(false);
   const [activeId, setActiveId] = useState("");
   const [isNewGroup, setIsNewGroup] = useState(true);
+  const [responseData, Refetch, isLoading] = useDataFetcher(
+    "GET",
+    `/api/apps/faq/${groupId}`,
+    ""
+  );
+
+  const [responseFaqGroup, faqGroup] = useDataFetcher(
+    "GET",
+    `/api/apps/faq-group/${groupId}`,
+    ""
+  );
+
+  useEffect(() => {
+    faqGroup();
+  }, []);
+
   const handleModalChange = useCallback(
     (isNew, id) => {
       setIsNewGroup(isNew);
       setActiveId(id);
       setActive(!active);
+      if (!isNew) {
+        Refetch();
+      }
     },
     [active]
   );
+  useEffect(() => {
+    if (!isLoading && !responseData.success) {
+      Refetch();
+    }
+  }, [Refetch, isLoading]);
+  useEffect(() => {
+    if (responseData.success) {
+      setOrders([...responseData.result]);
+    }
+  }, [responseData]);
+
+  const resourceName = {
+    singular: "FAQ",
+    plural: "FAQ's",
+  };
+
   const CURRENT_PAGE = "current_page";
 
-  const rowMarkup = orders.map(
-    ({ _id, id, name, description, order }, index) => (
-      <IndexTable.Row
-        id={id}
-        key={id}
-        selected={selectedResources.includes(id)}
-        position={index}
-      >
-        <IndexTable.Cell>
-          <Text variant="bodyMd" fontWeight="bold" as="span">
-            {index + 1}
-          </Text>
-        </IndexTable.Cell>
-        <IndexTable.Cell>{name}</IndexTable.Cell>
-        <IndexTable.Cell>{description}</IndexTable.Cell>
-        <IndexTable.Cell>
-          <ButtonGroup>
-            <Button variant="primary" url={`/faq/${id}`}>
-              FAQ's
-            </Button>
-            <Button
-              variant="primary"
-              icon={EditMajor}
-              tone="success"
-              onClick={() => handleModalChange(false, _id)}
-            >
-              Edit
-            </Button>
-            <Button variant="primary" icon={DeleteMajor} tone="critical">
-              Delete
-            </Button>
-          </ButtonGroup>
-        </IndexTable.Cell>
-        <div className="hidden">
-          <FaqGroup
-            _id={_id}
-            name={name}
-            active={active}
-            orders={orders}
-            activeId={activeId}
-            isNewGroup={isNewGroup}
-            handleModalChange={handleModalChange}
-          />
-          ;
-        </div>
-      </IndexTable.Row>
-    )
-  );
-
   return (
-    <div className="w-full">
-      <div>
-        <Button variant="primary" onClick={() => handleModalChange(true)}>
-          Create New Group
-        </Button>
-      </div>
-      <LegacyCard>
-        <IndexTable
-          resourceName={resourceName}
-          itemCount={orders.length}
-          headings={[
-            { title: "index" },
-            { title: "Name" },
-            { title: "Description" },
-            { title: "Actions" },
-          ]}
-        >
-          {rowMarkup}
-        </IndexTable>
-      </LegacyCard>
+    <div className="w-full ">
+      <Frame>
+        <div className="my-20 flex justify-around">
+          <Button icon={MobileBackArrowMajor} url="/faq-group">
+            Back To Group
+          </Button>
+          <Text variant="heading3xl" as="h2">
+            The All FAQ Of
+            <span className="text-green-800">
+              {" "}
+              {responseFaqGroup.result !== undefined
+                ? responseFaqGroup.result[0].name
+                : "..."}{" "}
+              {"  "}
+            </span>
+            Group
+          </Text>
+          <Button variant="primary" onClick={() => handleModalChange(true)}>
+            Create New Faq
+          </Button>
+        </div>
+        <div className="container mx-auto">
+          <LegacyCard>
+            {isLoading ? (
+              <div className="h-[50vh] w-[100vw] flex justify-center items-center">
+                <Spinner accessibilityLabel="Spinner example" size="large" />
+              </div>
+            ) : (
+              <>
+                <div className={`${orders ? "hidden" : "block"}`}>
+                  <FaqForm
+                    active={active}
+                    Refetch={Refetch}
+                    activeId={activeId}
+                    groupId={groupId}
+                    isNewGroup={isNewGroup}
+                    handleModalChange={handleModalChange}
+                  />
+                </div>
+                <IndexTable
+                  selectable={false}
+                  hasZebraStriping={true}
+                  resourceName={resourceName}
+                  itemCount={orders.length}
+                  headings={[
+                    { title: "index" },
+                    { title: "Name" },
+                    { title: "Description" },
+                    { title: "Actions" },
+                  ]}
+                >
+                  {orders.map(({ _id, id, name, description }, index) => (
+                    <>
+                      <FaqItem
+                        key={index}
+                        index={index}
+                        groupId={groupId}
+                        _id={_id}
+                        id={id}
+                        name={name}
+                        description={description}
+                        orders={orders}
+                        active={active}
+                        Refetch={Refetch}
+                        activeId={activeId}
+                        isNewGroup={isNewGroup}
+                        handleModalChange={handleModalChange}
+                      />
+                    </>
+                  ))}
+                </IndexTable>
+              </>
+            )}
+          </LegacyCard>
+        </div>
+      </Frame>
     </div>
   );
 };

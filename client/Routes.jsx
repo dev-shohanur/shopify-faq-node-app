@@ -6,17 +6,23 @@ import BillingAPI from "./pages/debug/Billing";
 import GetData from "./pages/debug/Data";
 import DebugIndex from "./pages/debug/Index";
 import ActiveWebhooks from "./pages/debug/Webhooks";
+import LayOut from "./pages/FaqGroup/LayOut";
+import FaqGroups from "./pages/FaqGroup/FaqGroups";
 import Faq from "./pages/Faq/Faq";
-import LayOut from "./pages/Faq/LayOut";
+import Setting from "./pages/Setting";
+import FaqStoreFont from "./pages/StoreFont/FaqStoreFont";
+
+
 
 const routes = {
-  "/": () => <Index />,
-  "/exitframe": () => <ExitFrame />,
+  "/": () => <FaqGroups />,
   "/exitframe/:shop": ({ shop }) => <ExitFrame shop={shop} />,
   "/debug": () => <DebugIndex />,
   "/debug/webhooks": () => <ActiveWebhooks />,
   "/debug/billing": () => <BillingAPI />,
-  "/faq": () => <Faq />,
+  "/faq-group": () => <FaqGroups />,
+  "/setting": () => <Setting />,
+  "/faq-group/faq/:groupId": ({ groupId }) => <Faq groupId={groupId} />,
   "/layout": () => <LayOut />,
   "/debug/data": () => <GetData />,
 

@@ -1,0 +1,40 @@
+{% assign full_url = request.host | append: request.path %}
+
+<div class="qr_img" style="{{block.settings.position}} position: fixed; z-index: 999;">
+  {% comment %}
+    {{ 'thumbs-up.png' | asset_url | image_tag }}
+  {% endcomment %}
+  <img
+    width="{{block.settings.size}}"
+    heidth="{{block.settings.size}}"
+    src="https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=https://{{full_url}}"
+  >
+</div>
+
+{% schema %}
+{
+  "name": "Page QR",
+  "target": "body",
+  "stylesheet": "qr_style.css",
+  "settings": [
+    {
+      "type": "number",
+      "id": "size",
+      "label": "QR size (PX)",
+      "default": 150
+    },
+    {
+      "label": "Select Position",
+      "id": "position",
+      "type": "select",
+      "options": [
+        { "value": "bottom: 0; right: 0;", "label": "Bottom Right" },
+        { "value": "bottom: 0; left: 0;", "label": "Bottom Left" },
+        { "value": "top: 0; right: 0;", "label": "Top Right" },
+        { "value": "top: 0; left: 0;", "label": "Top Left" }
+      ],
+      "default": "bottom: 0; right: 0;"
+    }
+  ]
+}
+{% endschema %}

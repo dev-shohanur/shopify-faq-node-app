@@ -4,8 +4,8 @@
   "description": "Shopify Boilerplate Code written in React, Node, Express, MongoDB and GraphQL",
   "type": "module",
   "author": {
-    "name": "Harshdeep Singh Hura",
-    "url": "https://harshdeephura.com"
+    "name": "Md Shohanur Rahman",
+    "url": "https://www.facebook.com/WebDevShohanur"
   },
   "repository": {
     "type": "git",
@@ -32,19 +32,26 @@
     "preserve": "npm run build"
   },
   "dependencies": {
+    "@apollo/client": "^3.8.8",
+    "@babel/core": "^7.23.6",
+    "@babel/preset-env": "^7.23.6",
+    "@babel/preset-react": "^7.23.3",
     "@shopify/polaris": "^12.1.1",
     "@shopify/polaris-icons": "^7.9.0",
     "@shopify/shopify-api": "^8.0.2",
+    "axios": "^1.6.2",
     "compression": "^1.7.4",
     "cryptr": "^6.3.0",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "https": "^1.0.0",
     "mongodb": "^6.3.0",
     "mongoose": "^8.0.1",
     "raviger": "^4.1.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "serve-static": "^1.15.0"
+    "serve-static": "^1.15.0",
+    "shopify-api-node": "^3.12.7"
   },
   "devDependencies": {
     "@shopify/cli-kit": "^3.51.0",

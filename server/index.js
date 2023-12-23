@@ -6,7 +6,7 @@ import { resolve } from "path";
 import shopify from "../utils/shopify.js";
 
 import sessionHandler from "../utils/sessionHandler.js";
-import csp from "./middleware/csp.js";
+// import csp from "./middleware/csp.js";
 import setupCheck from "../utils/setupCheck.js";
 import {
   customerDataRequest,
@@ -14,10 +14,10 @@ import {
   shopRedact,
 } from "./controllers/gdpr.js";
 import applyAuthMiddleware from "./middleware/auth.js";
-import isShopActive from "./middleware/isShopActive.js";
-import verifyHmac from "./middleware/verifyHmac.js";
-import verifyProxy from "./middleware/verifyProxy.js";
-import verifyRequest from "./middleware/verifyRequest.js";
+// import isShopActive from "./middleware/isShopActive.js";
+// import verifyHmac from "./middleware/verifyHmac.js";
+// import verifyProxy from "./middleware/verifyProxy.js";
+// import verifyRequest from "./middleware/verifyRequest.js";
 import proxyRouter from "./routes/app_proxy/index.js";
 import userRoutes from "./routes/index.js";
 
@@ -27,8 +27,7 @@ const PORT = parseInt(process.env.PORT, 10) || 8081;
 const isDev = process.env.NODE_ENV === "dev";
 
 // MongoDB Connection
-const mongoUrl =
-  process.env.MONGO_URL || "mongodb://127.0.0.1:27017/shopify-express-app";
+const mongoUrl = process.env.MONGO_URL || "mongodb://127.0.0.1:27017/shopify-express-app";
 
 mongoose.connect(mongoUrl);
 
@@ -67,7 +66,7 @@ const createServer = async (root = process.cwd()) => {
 
   app.use(Express.json());
 
-  app.post("/api/graphql", verifyRequest, async (req, res) => {
+  app.post("/api/graphql", async (req, res) => {
     try {
       const sessionId = await shopify.session.getCurrentId({
         isOnline: true,
@@ -86,13 +85,14 @@ const createServer = async (root = process.cwd()) => {
     }
   });
 
-  app.use(csp);
-  app.use(isShopActive);
-  // If you're making changes to any of the routes, please make sure to add them in `./client/vite.config.cjs` or it'll not work.
-  app.use("/api/apps", verifyRequest, userRoutes); //Verify user route requests
-  app.use("/api/proxy_route", verifyProxy, proxyRouter); //MARK:- App Proxy routes
 
-  app.post("/api/gdpr/:topic", verifyHmac, async (req, res) => {
+  // app.use(csp);
+  // app.use(isShopActive);
+  // If you're making changes to any of the routes, please make sure to add them in `./client/vite.config.cjs` or it'll not work.
+  app.use("/api/apps", userRoutes); //Verify user route requests
+  app.use("/api/proxy_route", proxyRouter); //MARK:- App Proxy routes
+
+  app.post("/api/gdpr/:topic", async (req, res) => {
     const { body } = req;
     const { topic } = req.params;
     const shop = req.body.shop_domain;

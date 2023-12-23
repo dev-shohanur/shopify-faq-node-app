@@ -10,33 +10,30 @@ import {
 } from "@shopify/polaris";
 import React, { useCallback, useEffect, useState } from "react";
 import useFetch from "../../hooks/useFetch";
+import useDataFetcher from "../../hooks/useDataFetcher";
 
-const useDataFetcher = (initialState, url, options) => {
-  const [data, setData] = useState(initialState);
-  const fetch = useFetch();
-
-  const fetchData = async () => {
-    setData("loading...");
-    const result = await (await fetch(url, options)).json();
-    setData(result);
-  };
-
-  return [data, fetchData];
-};
-
-const FaqGroup = ({
+// const parentEl = document.getElementById("el");
+// const el = document.createElement('div');
+// el.innerHTML = `
+// <h1>hello word</h1>
+// `
+// parentEl.appendChild(el)
+const FaqForm = ({
   _id,
-  name,
   active,
   activeId,
-  isNewGroup,
+  Refetch,
   handleModalChange,
-  orders,
+  group,
+  groupId,
+  isNewGroup,
 }) => {
-  const group = orders.filter((order) => order._id === _id);
+  const faqName = group?.name;
+  const faqDescription = group?.description;
 
-  const [title, setTitle] = useState(group[0].name);
-  const [description, setDescription] = useState(group[0].description);
+
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
 
   const handleUpdateChange = useCallback((value, setData) => {
     setData(value);
@@ -44,39 +41,48 @@ const FaqGroup = ({
 
   const handleClose = () => {
     handleModalChange(false, _id);
+    Refetch();
   };
 
-  const postOptions = {
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    method: "POST",
-    body: JSON.stringify({ name: title, description }),
-  };
-  const [responseDataPost, fetchContentPost] = useDataFetcher(
-    "",
-    "/api/apps/faq",
-    postOptions
+  const [responseDataPut, fetchContentPut, isLoadingUpdate] = useDataFetcher(
+    "PUT",
+    `/api/apps/faq/${_id}`,
+    { group_id: groupId, name: title, description }
   );
-  const handlePost = (event) => {
-    fetchContentPost();
-    setTitle("");
-    setDescription("");
-  };
+  const [responsePostFaq, postFaq, isLoadingPost] = useDataFetcher(
+    "POST",
+    "/api/apps/faq",
+    { group_id: groupId, name: title, description }
+  );
+  const [groupData, getGroupData, isLoading] = useDataFetcher(
+    "GET",
+    `/api/apps/faq-group/${groupId}`,
+    ""
+  );
 
   useEffect(() => {
-    console.log(isNewGroup, "Md Shohanur Rahman 111");
     if (isNewGroup) {
       setTitle("");
       setDescription("");
-    } else {
-      setTitle(group[0].name);
-      setDescription(group[0].description);
+      getGroupData();
+    } else if (faqName && faqDescription) {
+      setTitle(faqName);
+      setDescription(faqDescription);
     }
   }, [isNewGroup]);
-  console.log(isNewGroup);
-  console.log({ title, description });
+
+  const handlePost = (event) => {
+    Refetch();
+    postFaq();
+    setTitle("");
+    setDescription("");
+    handleClose();
+  };
+  const handlePut = (event) => {
+    Refetch();
+    fetchContentPut();
+    handleClose();
+  };
 
   return (
     <Frame>
@@ -85,8 +91,8 @@ const FaqGroup = ({
         onClose={handleClose}
         title="Export customers"
         primaryAction={{
-          content: "Export customers",
-          onAction: handleClose,
+          content: isNewGroup ? "Create New Faq" : "Update Faq",
+          onClick: isNewGroup ? handlePost : handlePut,
         }}
         secondaryActions={[
           {
@@ -97,8 +103,7 @@ const FaqGroup = ({
       >
         <Modal.Section>
           <LegacyStack vertical>
-            <Text>Md Shohanur Rahman</Text>
-            <Form onSubmit={handlePost}>
+            <Form>
               <FormLayout>
                 <TextField
                   label="Title"
@@ -114,9 +119,6 @@ const FaqGroup = ({
                   }
                   autoComplete="off"
                 />
-                <Button submit variant="primary">
-                  Submit
-                </Button>
               </FormLayout>
             </Form>
           </LegacyStack>
@@ -126,4 +128,4 @@ const FaqGroup = ({
   );
 };
 
-export default FaqGroup;
+export default FaqForm;

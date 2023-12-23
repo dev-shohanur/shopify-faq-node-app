@@ -51,16 +51,18 @@ const GetData = () => {
     method: "POST",
     body: JSON.stringify({ text: "Body of POST request" }),
   };
-
-  const [responseData, fetchContent] = useDataFetcher("", "/api/apps");
+  const [responseDataGQL, fetchContentGQL] = useDataFetcher(
+    "",
+    "/api/apps/debug/gql"
+  );
+  const [responseData, fetchContent] = useDataFetcher(
+    "",
+    `https://${responseDataGQL}.com/admin/api/2023-10/shop.json`
+  );
   const [responseDataPost, fetchContentPost] = useDataFetcher(
     "",
     "/api/apps",
     postOptions
-  );
-  const [responseDataGQL, fetchContentGQL] = useDataFetcher(
-    "",
-    "/api/apps/debug/gql"
   );
 
   useEffect(() => {
